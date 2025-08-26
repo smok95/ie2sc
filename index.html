@@ -1,4 +1,24 @@
 <!DOCTYPE html>
+<!--
+    ================================================
+    C If-Else to Switch-Case 변환기
+    ================================================
+    버전: v1.1.0
+    최종 수정일: 2025-08-26
+    작성자: smok95
+    
+    [변경 이력]
+    v1.1.0 (2025-08-26)
+    - 주석이 포함된 if-else 문 변환 지원 추가
+    - 정규식 패턴 개선으로 주석 처리 향상
+    
+    v1.0.0 (2025-08-26)
+    - 초기 버전 릴리즈
+    - 기본적인 if-else to switch-case 변환 기능
+    - OR 조건 지원
+    - 자동 클립보드 복사 기능
+    ================================================
+-->
 <html lang="ko">
 <head>
     <meta charset="UTF-8">
@@ -121,22 +141,31 @@
     // code
 } else {
     // code
-}">if (x == 1) {
+}">if (x == 1) { // 첫 번째 if문
     for(int i = 0; i < 10; i++) {
         if(i == 5) break;  // for문의 break
         printf("%d ", i);
     }
     printf("Case 1");
-} else if (x == 2 || x == 6) {
+} else if (x == 2 || x == 6 || x==7) // 두 번째 else if문   
+{
     while(condition) {
         if(error) break;   // while문의 break
         process();
     }
     printf("Two or Six");
-} else {
+} 
+/*
+else if(x==11) {
+    // 멀티라인주석은 case변한되면 안됨
+}
+*/
+else { // 와주 여름이다//**/
+
     printf("Other");
     break;  // 이것만 switch용 break로 인식
-}</textarea>
+}
+</textarea>
         </div>
         
         <div class="panel">
@@ -208,6 +237,9 @@
         }
         
         function convertIfElseToSwitch(code) {
+            // 멀티라인 주석 제거
+            code = code.replace(/\/\*[\s\S]*?\*\//g, '');
+            
             // 변수명 추출 (첫 번째 if문에서)
             const variableMatch = code.match(/if\s*\(\s*([a-zA-Z_][a-zA-Z0-9_]*)/);
             if (!variableMatch) {
@@ -217,9 +249,9 @@
             const variable = variableMatch[1];
             let result = `switch (${variable}) {\n`;
             
-            // if, else if 패턴 찾기 (OR 조건 포함)
-            const ifElsePattern = /(if|else\s+if)\s*\(([^)]+)\)\s*\{([^{}]*(?:\{[^{}]*\}[^{}]*)*)\}/g;
-            const elsePattern = /else\s*\{([^{}]*(?:\{[^{}]*\}[^{}]*)*)\}/;
+            // if, else if 패턴 찾기 (주석 고려, 더 견고한 패턴)
+            const ifElsePattern = /(if|else\s+if)\s*\(([^)]+)\)\s*(?:\/\/[^\n\r]*)?[\s\n\r]*\{((?:[^{}]|\{[^{}]*\})*)\}/g;
+            const elsePattern = /else\s*(?:\/\/[^\n\r]*)?[\s\n\r]*\{((?:[^{}]|\{[^{}]*\})*)\}/;
             
             let match;
             while ((match = ifElsePattern.exec(code)) !== null) {
@@ -245,9 +277,9 @@
                 
                 // 간단하게 break 포함 여부만 확인
                 if (!body.includes('break')) {
-                    result += '\n    } break;\n\n';
+                    result += '\n    }break;\n';
                 } else {
-                    result += '\n    } break;\n\n';
+                    result += '\n    }break;\n';
                 }
             }
             
@@ -264,9 +296,9 @@
                 result += indentedElseBody;
                 
                 if (!elseBody.includes('break')) {
-                    result += '\n    } break;\n';
+                    result += '\n    }break;\n';
                 } else {
-                    result += '\n    } break;\n';
+                    result += '\n    }break;\n';
                 }
             }
             
